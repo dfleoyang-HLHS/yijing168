@@ -1,4 +1,4 @@
-import { approximateMonthWuxing, yearWuxing } from "@/data/yijing/ganzhi";
+import { monthWuxingAt, yearWuxing } from "@/data/yijing/ganzhi";
 import { CAREER_INTERPRETATIONS } from "@/data/yijing/interpretations/career";
 import { HEALTH_INTERPRETATIONS } from "@/data/yijing/interpretations/health";
 import { RELATIONSHIP_INTERPRETATIONS } from "@/data/yijing/interpretations/relationship";
@@ -91,7 +91,7 @@ export function interpret(params: InterpretParams): DivinationReading {
   }
 
   const referenceWuxing =
-    domain === "yearly" ? yearWuxing(params.targetYear ?? referenceDate.getFullYear()) : approximateMonthWuxing(referenceDate.getMonth() + 1);
+    domain === "yearly" ? yearWuxing(params.targetYear ?? referenceDate.getFullYear()) : monthWuxingAt(referenceDate);
 
   const strength = judgeStrength(useShenLine.wuxing, referenceWuxing);
   const bank = interpretationBankFor(domain);

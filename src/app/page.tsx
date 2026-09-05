@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { HexagramDiagram } from "@/components/HexagramDiagram";
 import { buildHexagramLayout } from "@/lib/yijing/najia";
-import { castByBirthYearly, castByCoins, castByTime } from "@/lib/yijing/cast";
+import { HOUR_BRANCH_OPTIONS, castByBirthYearly, castByCoins, castByTime } from "@/lib/yijing/cast";
 import { interpret } from "@/lib/yijing/interpret";
 import type { DivinationReading, Domain, Gender } from "@/lib/yijing/types";
 
@@ -18,13 +18,14 @@ const DOMAIN_HINT: Record<Domain, string> = {
   career: "以「官鬼爻」旺衰判斷工作、上司與競爭壓力的走向。",
   relationship: "依性別取「妻財爻」或「官鬼爻」判斷感情對象的狀態。",
   health: "以「子孫爻」旺衰判斷平安與身心狀態（僅供參考，非醫療診斷）。",
-  yearly: "依出生年月日與查詢年份起卦，判斷該年整體運勢（世爻旺衰）。",
+  yearly: "依出生年月日時與查詢年份起卦，判斷該年整體運勢（世爻旺衰）。",
 };
 
 const currentYear = new Date().getFullYear();
 
 export default function Home() {
   const [birthDate, setBirthDate] = useState("1990-01-01");
+  const [birthHour, setBirthHour] = useState<string>(""); // "" = 未知，預設以子時計算
   const [gender, setGender] = useState<Gender>("male");
   const [domain, setDomain] = useState<Domain>("yearly");
   const [castMethod, setCastMethod] = useState<"coins" | "time">("coins");
@@ -41,10 +42,11 @@ export default function Home() {
       return;
     }
     const [year, month, day] = parts;
+    const hourBranchIndex = birthHour === "" ? undefined : Number(birthHour);
 
     const cast =
       domain === "yearly"
-        ? castByBirthYearly({ year, month, day }, targetYear)
+        ? castByBirthYearly({ year, month, day, hourBranchIndex }, targetYear)
         : castMethod === "coins"
           ? castByCoins()
           : castByTime(new Date());
@@ -74,9 +76,9 @@ export default function Home() {
         onSubmit={handleSubmit}
         className="space-y-5 rounded-xl border border-stone-200 bg-white p-6 shadow-sm"
       >
-        <div className="grid gap-4 sm:grid-cols-2">
+        <div className="grid gap-4 sm:grid-cols-3">
           <label className="flex flex-col gap-1 text-sm">
-            <span className="font-medium text-stone-700">出生年月日</span>
+            <span className="font-medium text-stone-700">出生年月日（西元）</span>
             <input
               type="date"
               value={birthDate}
@@ -84,6 +86,22 @@ export default function Home() {
               className="rounded-md border border-stone-300 px-3 py-2 text-sm"
               required
             />
+          </label>
+
+          <label className="flex flex-col gap-1 text-sm">
+            <span className="font-medium text-stone-700">出生時辰</span>
+            <select
+              value={birthHour}
+              onChange={(e) => setBirthHour(e.target.value)}
+              className="rounded-md border border-stone-300 px-3 py-2 text-sm"
+            >
+              <option value="">不確定（預設以子時計算）</option>
+              {HOUR_BRANCH_OPTIONS.map((h) => (
+                <option key={h.index} value={h.index}>
+                  {h.label}
+                </option>
+              ))}
+            </select>
           </label>
 
           <label className="flex flex-col gap-1 text-sm">

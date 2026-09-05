@@ -1,5 +1,6 @@
 import { EARTHLY_BRANCHES, HEAVENLY_STEMS, type EarthlyBranch, type HeavenlyStem } from "@/lib/yijing/types";
 import { branchWuxing } from "./najiaTable";
+import { exactMonthBranch } from "./solarTerms";
 
 /** 西元年 → 干支。1984 = 甲子年 為基準點（(1984-4) % 60 = 0）。 */
 export function yearGanzhi(year: number): { stem: HeavenlyStem; branch: EarthlyBranch } {
@@ -13,14 +14,13 @@ export function yearWuxing(year: number) {
 }
 
 /**
- * 簡化版「月建」：以國曆月份近似農曆節氣月支（寅月≈2月、卯月≈3月...）。
- * 這是簡化演算法，未精算節氣交接日，僅用於粗略的旺衰判斷參考。
+ * 精算月建：依真實節氣交接日判斷月支（見 solarTerms.ts）。
+ * 取代舊版「以國曆月份近似」的簡化演算法。
  */
-export function approximateMonthBranch(gregorianMonth: number): EarthlyBranch {
-  const idx = (((gregorianMonth % 12) % 12) + 12) % 12;
-  return EARTHLY_BRANCHES[idx];
+export function monthBranchAt(date: Date): EarthlyBranch {
+  return exactMonthBranch(date);
 }
 
-export function approximateMonthWuxing(gregorianMonth: number) {
-  return branchWuxing(approximateMonthBranch(gregorianMonth));
+export function monthWuxingAt(date: Date) {
+  return branchWuxing(monthBranchAt(date));
 }

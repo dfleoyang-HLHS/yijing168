@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { castByBirthYearly, castByCoins, castByTime } from "../cast";
+import { castByBirthYearly, castByCoins, castByTime, hourToBranchIndex } from "../cast";
 
 describe("castByCoins", () => {
   it("produces deterministic output for a fixed sequence of random values", () => {
@@ -63,5 +63,33 @@ describe("castByBirthYearly", () => {
     // 年支不同必然造成下卦與動爻計算不同（除非模數運算巧合），此處驗證兩者非全同
     const same = JSON.stringify(y2026.bits) === JSON.stringify(y2027.bits) && JSON.stringify(y2026.moving) === JSON.stringify(y2027.moving);
     expect(same).toBe(false);
+  });
+
+  it("defaults to hourBranchIndex 0 (子時) when omitted, matching an explicit 0", () => {
+    const birth = { year: 1990, month: 5, day: 20 };
+    const withoutHour = castByBirthYearly(birth, 2026);
+    const withZeroHour = castByBirthYearly({ ...birth, hourBranchIndex: 0 }, 2026);
+    expect(withoutHour.bits).toEqual(withZeroHour.bits);
+    expect(withoutHour.moving).toEqual(withZeroHour.moving);
+  });
+
+  it("produces different results for different birth hours (in general)", () => {
+    const base = { year: 1990, month: 5, day: 20 };
+    const noon = castByBirthYearly({ ...base, hourBranchIndex: 6 }, 2026); // 午時
+    const midnight = castByBirthYearly({ ...base, hourBranchIndex: 0 }, 2026); // 子時
+    const same = JSON.stringify(noon.bits) === JSON.stringify(midnight.bits) && JSON.stringify(noon.moving) === JSON.stringify(midnight.moving);
+    expect(same).toBe(false);
+  });
+});
+
+describe("hourToBranchIndex", () => {
+  it("maps clock hours to the correct 時辰 index (子=0 spans 23:00-00:59)", () => {
+    expect(hourToBranchIndex(23)).toBe(0);
+    expect(hourToBranchIndex(0)).toBe(0);
+    expect(hourToBranchIndex(1)).toBe(1);
+    expect(hourToBranchIndex(2)).toBe(1);
+    expect(hourToBranchIndex(3)).toBe(2);
+    expect(hourToBranchIndex(12)).toBe(6);
+    expect(hourToBranchIndex(13)).toBe(7);
   });
 });
