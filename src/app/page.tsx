@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { HexagramDiagram } from "@/components/HexagramDiagram";
+import { HexagramJudgment, HexagramLineTexts } from "@/components/HexagramText";
 import { buildHexagramLayout } from "@/lib/yijing/najia";
 import { HOUR_BRANCH_OPTIONS, castByBirthYearly, castByCoins, castByTime } from "@/lib/yijing/cast";
 import { interpret } from "@/lib/yijing/interpret";
@@ -210,6 +211,8 @@ export default function Home() {
             </span>
           </div>
 
+          <HexagramJudgment hexagram={reading.hexagram} />
+
           <div className="flex flex-wrap gap-8">
             <div>
               <p className="mb-2 text-sm text-stone-500">卦象（由上而下）</p>
@@ -226,9 +229,24 @@ export default function Home() {
                 <p className="mt-2 text-xs text-stone-400">
                   主題：{reading.changedHexagram.keyword}
                 </p>
+                <div className="mt-2 max-w-sm">
+                  <HexagramJudgment hexagram={reading.changedHexagram} />
+                </div>
               </div>
             )}
           </div>
+
+          <details className="rounded-lg border border-stone-200 p-4">
+            <summary className="cursor-pointer text-sm font-medium text-stone-700">
+              查看本卦六爻爻辭原文與白話語譯
+            </summary>
+            <div className="mt-3">
+              <HexagramLineTexts
+                hexagram={reading.hexagram}
+                useShenPosition={reading.useShenLine.position}
+              />
+            </div>
+          </details>
 
           <div className="space-y-2 rounded-lg bg-stone-50 p-4">
             <p className="text-sm text-stone-600">
